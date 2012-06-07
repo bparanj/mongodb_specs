@@ -2,6 +2,13 @@ require 'mongo'
 
 describe 'Mongodb Learning Specs using Mongo Ruby driver' do
   context 'Basics of Mongodb' do
+    
+    specify 'Create a connection to MongoDB' do
+      connection = Mongo::Connection.new
+
+      connection.should be_instance_of(Mongo::Connection)      
+    end
+    
     specify 'Create a new database named matrix' do
       connection = Mongo::Connection.new
       db = connection.db('matrix')
