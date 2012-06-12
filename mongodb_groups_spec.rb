@@ -100,6 +100,4 @@ describe 'Mongodb Groups' do
     end
   end
   
-  
-  
 end
