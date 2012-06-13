@@ -1,0 +1,5 @@
+1. Run Mongo daemon:
+ 			$mongod --dbpath /Users/bparanj/data/mongodb
+2. To run spec:
+			$rspec mongodb_queries_spec.rb 
+			
