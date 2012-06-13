@@ -2,4 +2,10 @@
  			$mongod --dbpath /Users/bparanj/data/mongodb
 2. To run spec:
 			$rspec mongodb_queries_spec.rb 
+3. The specs needs Mongodb version v1.6.2. to be running.
+
+TODO:
+
+1. One of the spec gives deprecation messages. Get rid of deprecation messages.
+
 			
