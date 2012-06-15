@@ -1,9 +1,9 @@
 require 'mongo'
 
-describe 'Mongodb Query Options' do
+describe 'Mongodb Query Conditions' do
   before do
     connection = Mongo::Connection.new
-    @db = connection.db('query_options')  
+    @db = connection.db('query_condtions')  
   end
   
   after do

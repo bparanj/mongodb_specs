@@ -27,7 +27,7 @@ describe 'Mongodb Learning Specs using Mongo Ruby driver' do
     end  
   end
   
-  context 'Connect to a database at setup and cleanup at teardown' do
+  context 'About CRUD' do
     before do
       @connection = Mongo::Connection.new
       @db = @connection.db('matrix')
