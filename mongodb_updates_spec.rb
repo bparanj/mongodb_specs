@@ -71,6 +71,104 @@ describe 'Mongodb Updates' do
     count.should == 3
   end
   
+  specify 'Set all records for a given field with a value' do
+    @collection = @db["foods"]
+    @collection.insert({:category => "sandwich", :type => "peanut butter"})
+    @collection.insert({:type => "tuna salad"})
+    
+    @collection.update({:type => "tuna salad"}, {'$set' => {:category => "sandwich"}}, {:multi => true })
+    
+    result = @collection.find({:category => "sandwich"}).count
+    
+    result.should == 2
+  end
 
+  specify 'Unset all records for a given field with a value' do
+    @collection = @db["foods"]
+    @collection.insert({:category => "sandwich", :type => "peanut butter"})
+    
+    @collection.update({:category => "sandwich"}, {'$unset' => {:category => 1}}, {:multi => true })
+    
+    result = @collection.find({:category => "sandwich"}).count
+    
+    result.should == 0    
+  end
 
+  context 'Data set two' do
+    before do
+      @pix = @db['photos']
+      @pix.insert({:file => 'pic1.jpg', :loc => 'beach', :camera => 'Nikon'})
+      @pix.insert({:file => 'pic2.jpg', :loc => 'beach', :camera => 'Nikon'})
+      @pix.insert({:file => 'pic3.jpg', :loc => 'city', :camera => 'Nikon'})
+    end
+    
+    specify 'Pull a given item from existing record' do
+      @pix.update({:file => "pic1.jpg"}, {'$set' => {:tags => ['people','food','music','food','art'] }})  
+      @pix.update({:file => "pic1.jpg"}, {'$pull' => {:tags => "food"}})
+      
+      result = @pix.find({:file => "pic1.jpg"}).first['tags']
+      result.should == ['people', 'music', 'art']
+    end
+    
+    specify 'Pull All' do
+      @pix.update({:file => "pic1.jpg"}, {'$set' => {:tags => ['people', 'food', 'music', 'food', 'art'] }})  
+      @pix.update({:file => "pic1.jpg"}, {'$pullAll' => {:tags => ['food','art'] }})
+      
+      result = @pix.find({:file => "pic1.jpg"}).first['tags']
+      result.should == ['people', 'music']
+    end
+    
+    specify 'Push' do
+      @pix.update({:file => "pic1.jpg"}, {'$push' => {:tags => "people" }})
+      
+      result = @pix.find({:file => "pic1.jpg"}).first['tags']
+      
+      result.should == ['people']
+    end
+      
+    specify 'Push All' do
+      @pix.update({:file => "pic2.jpg"}, {'$pushAll' => {:tags => ['food', 'people'] }})
+      @pix.update({:file => "pic2.jpg"}, {'$pushAll' => {:tags => ['music', 'art'] }})
+      
+      result = @pix.find({:file => "pic2.jpg"}).first['tags']
+      
+      result.should == ['food', 'people', 'music', 'art']
+    end
+    
+    specify 'Push All : Push array to non-array field gives db error' do
+      @pix.update({:file => "pic3.jpg"}, {'$pushAll' => {:loc => ['food', 'people'] }})
+      
+      @db.should be_error
+    end
+    
+    specify 'Pop an element in the end' do
+      @pix.update({:file => "pic1.jpg"}, {'$set' => {:tags => ['people','food','music','art'] }})  
+      @pix.update({:file => "pic1.jpg"}, {'$pop' => {:tags => 1 }})
+      
+      result = @pix.find({:file => "pic1.jpg"}).first['tags']
+      
+      result.should == ['people','food','music']
+    end
+
+    specify 'Pop an element in the beginning' do
+      @pix.update({:file => "pic1.jpg"}, {'$set' => {:tags => ['people','food','music','art'] }})  
+      @pix.update({:file => "pic1.jpg"}, {'$pop' => {:tags => -1 }})
+      
+      result = @pix.find({:file => "pic1.jpg"}).first['tags']
+      
+      result.should == ['food','music','art']
+    end
+    
+    specify 'Check status for update permitted case' do
+      @pix.update({:file => "pic1.jpg"}, {'$push' => {:camera => "Canon"}})  
+      
+      @db.get_last_error['updatedExisting'].should be_nil
+    end
+    
+    specify 'Check status for a failed update' do
+      @pix.update({:file => "pic1.jpg"}, {'$push' => {:tags => "people"}})
+      
+      @db.get_last_error['updatedExisting'].should be_true
+    end
+  end
 end
