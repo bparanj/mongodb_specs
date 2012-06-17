@@ -9,8 +9,8 @@ describe 'Basics of Mongodb Data types' do
   end
   
   after do
-    @db.collections.each do |collection|
-      @db.drop_collection(collection.name) unless collection.name =~ /indexes$/
+    @db.collection_names.each do |name|
+      @db.drop_collection(name) unless name =~ /indexes$/
     end
   end
   
