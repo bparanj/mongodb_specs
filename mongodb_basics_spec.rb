@@ -16,6 +16,12 @@ describe 'Mongodb Learning Specs using Mongo Ruby driver' do
       db.should be_instance_of(Mongo::DB)
     end
 
+    specify 'Create a new database named matrix, another way.' do
+      db = Mongo::Connection.new.db('matrix')
+
+      db.should be_instance_of(Mongo::DB)
+    end
+
     specify 'Create an empty collection called empty in matrix database' do
       connection = Mongo::Connection.new
       db = connection.db('matrix')
@@ -25,6 +31,37 @@ describe 'Mongodb Learning Specs using Mongo Ruby driver' do
       empty_collection.size.should == 0
       empty_collection.should be_instance_of(Mongo::Collection)
     end  
+    
+    specify 'Listing all databases' do
+      connection = Mongo::Connection.new
+      result = connection.database_names
+      
+      result.should include('local')
+      result.should include('admin')
+    end
+    
+    specify 'List all the databases and its size' do
+      connection = Mongo::Connection.new
+      result = connection.database_info
+      
+      result.should include("admin" => 1)
+      result.should include("local" => 1)
+    end
+    
+    specify 'You can get a collection to use using the collection method' do
+      db = Mongo::Connection.new.db('matrix')
+      collection = db.collection('my_collection')
+      
+      collection.should be_instance_of(Mongo::Collection)
+    end
+    
+    specify 'You can get a collection to use using the shortcut [] method' do
+      db = Mongo::Connection.new.db('matrix')
+      collection = db['my_collection']
+      
+      collection.should be_instance_of(Mongo::Collection)
+    end
+    
   end
   
   context 'About CRUD' do
@@ -47,8 +84,17 @@ describe 'Mongodb Learning Specs using Mongo Ruby driver' do
       @collection.size.should == 1
       document[:test].should == @collection.find_one['test']
     end
+
+
+    specify 'Each database has 0 or more collections. You can retrieve a list of them from the db' do
+      document = {:test => 'hello mongo'}
+      @collection.insert(document)
+
+      result = @db.collection_names
+      result.should == ['system.indexes', 'my_collection']
+    end
     
-    specify 'List the contents of a collection via find' do
+    specify 'Reading the first document in a collection using find_one' do
       document = {:test => 'hello mongo'}
       @collection.insert(document)
 
@@ -78,7 +124,7 @@ describe 'Mongodb Learning Specs using Mongo Ruby driver' do
       @collection.find_one['category'].should == 'sandwich'
     end
     # Instead of using document1 and document2, using sandwich and soup for document names
-    specify 'Delete a document' do
+    specify 'Delete a document with remove' do
       sandwich = {:category => "sandwich", :type => "peanut butter" }
       @collection.insert(sandwich)
       soup = {:category => "soup", :type => "minestrone" }

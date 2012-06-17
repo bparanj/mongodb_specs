@@ -21,7 +21,7 @@ describe 'Mongodb Queries' do
       @people.insert({:name => "Dan", :active => true})
     end
     
-    specify 'Find all' do
+    specify 'find() function on a collection retrieves all of the documents' do
       all_people = @people.find.count
 
       all_people.should == 4
@@ -33,19 +33,25 @@ describe 'Mongodb Queries' do
       result.should == 0
     end
 
-    specify 'Find by name' do
+    specify 'Find all documents matching the value for a given field' do
       result = @people.find(:name => "Ada").count
 
       result.should == 1
     end
     
-    specify 'Index without creating index, there is alway one' do
+    specify 'All documents are automatically indexed on the _id key' do
       number_of_indexes = @people.index_information.count
       
       number_of_indexes.should == 1
     end
-    #Why is there one index before we added our first index?
-    specify 'Create Index on a key' do
+    
+    specify 'Getting a list of indexes on a collection.' do
+      indexes = @people.index_information
+
+      indexes.should_not be_empty
+    end
+
+    specify 'Create Index on a field.' do
       @people.create_index('name')
       number_of_indexes = @people.index_information.count
       
@@ -57,6 +63,20 @@ describe 'Mongodb Queries' do
       result = @people.find(:active => true).count
       
       result.should == 2
+    end
+
+    specify 'Use explain method on the cursor to show how MongoDB will run the query' do
+      id = @people.insert({:name => "Bugs"})
+      result = @people.find("_id" => id).explain
+      # Query by _id will use faster indexed BtreeCursor
+      result['cursor'].should == "BtreeCursor _id_"
+    end
+
+    specify 'Use explain : Query by a given field will use slower BasicCursor' do
+      id = @people.insert({:name => "Bugs"})
+      result = @people.find("name" => "Bugs").explain
+      # Query by a given field will use slower BasicCursor
+      result['cursor'].should == "BasicCursor"
     end
 
     specify 'Find by index field : Using explain[\'nscanned\'] to count' do
@@ -78,6 +98,12 @@ describe 'Mongodb Queries' do
       @books.insert({:name => "Patterns", :author => "Russ", :hard_cover => true})
       @books.insert({:name => "Refactoring", :author => "Jay", :hard_cover => true})
       @books.insert({:name => "Refactoring", :author => "William", :hard_cover => false})      
+    end
+    
+    specify 'Find : Selecting a subset of fields for a query. THIS IS A BUG' do
+      result = @books.find(:name => "Pickaxe", :fields => ['author'] ).to_a
+      # p result
+      result.should == []
     end
 
     specify 'Find by field1 and field2' do
