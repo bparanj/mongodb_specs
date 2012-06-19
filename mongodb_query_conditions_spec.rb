@@ -80,6 +80,18 @@ describe 'Mongodb Query Conditions' do
       
       result.should == 3
     end
+
+    specify 'Select using in : One attribute must match for the $in operator' do
+      result = @numbers.find({'num' => {'$in' => [1,3,200]}}).count
+      
+      result.should == 2
+    end
+
+    specify 'Select using all : All attributes must match for the $all operator' do
+      result = @numbers.find({'num' => {'$all' => [1,3,200]}}).count
+      
+      result.should == 0
+    end
     
     specify 'Select using not in using nin' do
       result = @numbers.find({'num' => {'$nin' => [1,3,5]}}).count
@@ -87,10 +99,23 @@ describe 'Mongodb Query Conditions' do
       result.should == 97
     end
     
-    specify 'Select using exists : Field exists' do
+    specify 'Search for multiple expressions in a single query using $or operator' do
+      pending 'Refer the docs for right syntax'
+      # result = @numbers.find({'num' => {'$or' => [{1},{101}]})
+      
+      # result.count.should == 0
+    end
+    
+    specify 'Select using exists : Field exists case. Return all items in the collection with a key named num' do
       result = @numbers.find({'num' => {'$exists' => true}}).count
       
       result.should == 100
+    end
+
+    specify 'Select using exists : Field exists case. Return all items in the collection without a key named num' do
+      result = @numbers.find({'num' => {'$exists' => false}}).count
+      
+      result.should == 0
     end
     
     specify 'Select using exists : Field does not exist' do
@@ -153,7 +178,7 @@ describe 'Mongodb Query Conditions' do
   end
   
   context 'Examples for using other options' do
-    specify 'Select using elemMatch option' do
+    specify 'Select using elemMatch option to match an entire document within an array' do
       collection = @db["mercury"]
       collection.insert({:name => "post1", :ratings => [{:val => "super", :count => 1}, {:val => "boring", :count => 12 }] })
       

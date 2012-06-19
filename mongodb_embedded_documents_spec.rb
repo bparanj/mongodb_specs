@@ -28,24 +28,30 @@ describe 'Mongodb Embedded Documents' do
     end
   end
   
+  specify 'Match results based on the BSON type. Find all items that have the type Embedded Object (it contains a list of information)' do
+   orders = @embedded.find({'lines' => {'$type' => 3}})  
+   
+   orders.count.should == 3
+  end
+  
   specify 'Query by given number and Count' do
     number_of_orders = @embedded.find({'order_num' => 103}).count
     
     number_of_orders.should == 1
   end
 
-  specify 'Query by accessing collection with a given number and Count' do
+  specify 'Query documents containing hash using the dot notation' do
+    number_of_orders = @embedded.find({'shipto.zip' => 60611}).count
+    
+    number_of_orders.should == 3
+  end
+
+  specify 'Query documents containing a collection of items using the dot notation' do
     number_of_orders = @embedded.find({'lines.line_num' => 3}).count
     number_of_orders.should == 1
     
     docs_count = @embedded.find({'lines.line_num' => 2}).count    
     docs_count.should == 2
-  end
-
-  specify 'Query using where like equivalent and Count' do
-    number_of_orders = @embedded.find({'shipto.zip' => 60611}).count
-    
-    number_of_orders.should == 3
   end
   
   specify 'Accessing an existing collection within an embedded document' do

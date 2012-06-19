@@ -21,7 +21,7 @@ describe 'Mongodb Queries' do
       @people.insert({:name => "Dan", :active => true})
     end
     
-    specify 'find() function on a collection retrieves all of the documents' do
+    specify 'find() function on a collection retrieves all of the documents. The count() function returns the number of documents in the specified collection' do
       all_people = @people.find.count
 
       all_people.should == 4
@@ -65,6 +65,18 @@ describe 'Mongodb Queries' do
       result.should == 2
     end
 
+    specify 'Find by given field value, skip is ignored when it is used with count' do
+      result = @people.find(:active => true).skip(1).count
+      
+      result.should == 2
+    end
+
+    specify 'Find by given field value, skip is forced when it is used with count(true)' do
+      result = @people.find(:active => true).skip(1).count(true)
+      
+      result.should == 1
+    end
+
     specify 'Use explain method on the cursor to show how MongoDB will run the query' do
       id = @people.insert({:name => "Bugs"})
       result = @people.find("_id" => id).explain
@@ -89,6 +101,12 @@ describe 'Mongodb Queries' do
       result.should == 2
     end
     
+    specify 'Retrieve a document with slice' do
+      pending 'Refer for the right syntax to use slice'
+      result = @people.find({'name' => {'$slice' => 1}})
+      
+      result.count.should == 0
+    end
   end
   
   context 'Data set two' do

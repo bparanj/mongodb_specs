@@ -94,7 +94,7 @@ describe 'Mongodb Learning Specs using Mongo Ruby driver' do
       result.should == ['system.indexes', 'my_collection']
     end
     
-    specify 'Reading the first document in a collection using find_one' do
+    specify 'Reading the first document in a collection using find_one. Use find_one if you expect only one result' do
       document = {:test => 'hello mongo'}
       @collection.insert(document)
 
@@ -114,10 +114,11 @@ describe 'Mongodb Learning Specs using Mongo Ruby driver' do
       @collection.find_one['type'].should == 'peanut butter'
     end
     # Using variable document to make it clear that we are inserting document
-    specify 'Update a document' do
+    specify 'The update() function takes four arguments: criteria, objNew, upsert and multi' do
       document = {:category => "sandwich", :type => "peanut butter" }
       @collection.insert(document)
-      
+      # The criteria specifies the query that selects the record to update : {'category' => 'sandwich'}
+      # The objNew specifies the updated information : {'$set' => {:type => "tuna fish"}
       @collection.update({'category' => 'sandwich'}, {'$set' => {:type => "tuna fish"}})
       
       @collection.find_one['type'].should == 'tuna fish'

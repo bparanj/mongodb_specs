@@ -19,14 +19,14 @@ describe 'Mongodb Updates' do
       @collection.insert({:category => "sandwich", :type => "tuna salad"})      
     end
     
-    specify 'Update one matching record' do
+    specify 'Update one matching record. Use $set operator to set a field\'s value' do
       @collection.update({'category' => 'sandwich'}, {'$set' => {:meal => "lunch"}})
 
       count = @collection.find({'meal' => 'lunch'}).count
       count.should == 1
     end
 
-    specify 'Update all matching records' do
+    specify 'Update all matching records. Multi argument specifies that all documents should be updated' do
       @collection.update({'category' => 'sandwich'}, {'$set' => {:meal => "lunch"}}, {:multi => true })
 
       count = @collection.find({'meal' => 'breakfast'}).count
@@ -40,8 +40,8 @@ describe 'Mongodb Updates' do
       result.should == 2
     end
     
-    specify 'Increment : Change one' do
-      @collection.update({:type => "peanut butter"}, {'$inc' => {:num => 1 }}, {:multi => true})
+    specify 'Increment : Increments a particular value by a certain amount' do
+      @collection.update({:type => "peanut butter"}, {'$inc' => {:num => 1 }})
       result = @collection.find({:num => 1 }).count
       
       result.should == 1
@@ -83,7 +83,7 @@ describe 'Mongodb Updates' do
     result.should == 2
   end
 
-  specify 'Unset all records for a given field with a value' do
+  specify 'Unset all records for a given field with a value. Unset operator deletes a given field.' do
     @collection = @db["foods"]
     @collection.insert({:category => "sandwich", :type => "peanut butter"})
     
@@ -102,7 +102,7 @@ describe 'Mongodb Updates' do
       @pix.insert({:file => 'pic3.jpg', :loc => 'city', :camera => 'Nikon'})
     end
     
-    specify 'Pull a given item from existing record' do
+    specify 'Pull removes each occurrence of a specified value from an array' do
       @pix.update({:file => "pic1.jpg"}, {'$set' => {:tags => ['people','food','music','food','art'] }})  
       @pix.update({:file => "pic1.jpg"}, {'$pull' => {:tags => "food"}})
       
@@ -110,7 +110,7 @@ describe 'Mongodb Updates' do
       result.should == ['people', 'music', 'art']
     end
     
-    specify 'Pull All' do
+    specify 'Pull All removes multiple elements with different values from an array' do
       @pix.update({:file => "pic1.jpg"}, {'$set' => {:tags => ['people', 'food', 'music', 'food', 'art'] }})  
       @pix.update({:file => "pic1.jpg"}, {'$pullAll' => {:tags => ['food','art'] }})
       
@@ -118,7 +118,7 @@ describe 'Mongodb Updates' do
       result.should == ['people', 'music']
     end
     
-    specify 'Push' do
+    specify 'Push : Appends a value to an array' do
       @pix.update({:file => "pic1.jpg"}, {'$push' => {:tags => "people" }})
       
       result = @pix.find({:file => "pic1.jpg"}).first['tags']
@@ -126,7 +126,7 @@ describe 'Mongodb Updates' do
       result.should == ['people']
     end
       
-    specify 'Push All' do
+    specify 'Push All : Appends several values to an array' do
       @pix.update({:file => "pic2.jpg"}, {'$pushAll' => {:tags => ['food', 'people'] }})
       @pix.update({:file => "pic2.jpg"}, {'$pushAll' => {:tags => ['music', 'art'] }})
       
@@ -141,7 +141,13 @@ describe 'Mongodb Updates' do
       @db.should be_error
     end
     
-    specify 'Pop an element in the end' do
+    specify 'Adding data to an array with $addToSet' do
+      pending 'Find syntax to use addToSet'
+      # @pix.insert({:file => 'pic10.jpg', :people => []})
+        
+    end
+    
+    specify 'Pop an element at the end' do
       @pix.update({:file => "pic1.jpg"}, {'$set' => {:tags => ['people','food','music','art'] }})  
       @pix.update({:file => "pic1.jpg"}, {'$pop' => {:tags => 1 }})
       

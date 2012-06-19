@@ -29,7 +29,7 @@ describe 'Mongodb Groups' do
     end    
   end
   
-  context 'Distinct' do
+  context 'Retrive unique values with Distinct' do
     before do
       @addresses = @db['addresses']
       @addresses.insert({'city' => 'chicago', 'zip' => 60606, 'tags' => ['metra', 'cta_bus'], 'use' => {'commercial' => 80, 'residential' => 20}})
@@ -70,7 +70,7 @@ describe 'Mongodb Groups' do
       @zips.insert({:city => 'decatur', :state => 'IL', :zip => 62523, :population => 1003})      
     end  
 
-    specify 'Simple group' do    
+    specify 'Group command returns an array of grouped items' do    
       group_by_one_field_result = @zips.group([:city], {}, {}, 'function() {}', true)
       group_by_one_field_result.should == [{'city' => "chicago"}, {'city' => "decatur"}]
     end
